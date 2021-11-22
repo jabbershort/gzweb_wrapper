@@ -6,7 +6,8 @@
     export default {
         data(){
             return {
-                source: process.env.VUE_APP_URL
+                //source: process.env.VUE_APP_URL //setting the source from env variable
+                source: "http://localhost:8080"
             }
         }
     }
