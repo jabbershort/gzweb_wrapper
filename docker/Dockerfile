@@ -3,6 +3,6 @@ WORKDIR /usr/src/app
 
 ADD . ./
 RUN npm install
-EXPOSE 8080
+EXPOSE 8888
 
 CMD npm run serve

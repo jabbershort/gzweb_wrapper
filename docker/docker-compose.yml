@@ -3,6 +3,6 @@ services:
   gzweb_wrapper:
     image: gzweb_wrapper
     ports:
-      - 8080:8080
+      - 8888:8888
     environment:
       - VUE_APP_URL="http://192.168.1.19:8080"
