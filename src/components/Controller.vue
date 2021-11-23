@@ -100,7 +100,7 @@
         methods: {
             getConnection(){
                 this.ros = new ROSLIB.Ros();
-                this.ros.connect('ws://192.168.1.19:9090')
+                this.ros.connect('ws://localhost:9090')
             },
             getGrips(){
                 var getGripsClient = new ROSLIB.Service({
