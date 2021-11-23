@@ -6,15 +6,14 @@
       elevation="8"
       dark
       rounded
+      height="50"
+      max-height="50"
       clipped-right
   >
       <v-toolbar-title>Gazebo Viewer</v-toolbar-title>
 
   </v-app-bar>
-
     <Controller></Controller>
-
-
   <v-main>
     <v-card elevation="8">
     <GazeboViewer></GazeboViewer>

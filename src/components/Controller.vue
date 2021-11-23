@@ -5,8 +5,9 @@
     dark
     color="blue lighten-1"  
     absolute
+    permanent
   >
-        <v-list-item>
+      <v-list-item>
       <v-list-item-content>
         <v-list-item-title class="title">
           Covvi Nexus Hand
@@ -21,28 +22,58 @@
       dense
       nav
     >
-    <v-list-item>
+    <v-row 
+      justify="center"
+      align="center"
+      style="height:80px"
+    >Select Grip</v-row>
         <v-select
             v-model="selectedGrip"
             :items="namesOfGrips"
+            outlined
+            rounded
+            @change="selectGrip"
         >
         </v-select>
-    </v-list-item>
-    <v-list-item
-      v-for="item in controllers"
-      :key="item.title"
-      link
+    <v-divider></v-divider>
+    <v-row
+      style="height:80px"
+      justify="center"
+      align="center"
     >
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
 
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+      <v-btn
+        elevation="2"
+        x-large
+        @click="openGrip"
+        >Open</v-btn>
+    </v-row>
+    <v-row      
+      style="height:80px"    
+      align="center"
+      justify="center"
+      >
+
+      <v-btn
+        elevation="2"
+        x-large
+        @click="closeGrip"
+        >Close</v-btn>
+    </v-row>
+    <v-divider></v-divider>
+    <v-row
+    justify="center"
+    align="center"
+    style="height:100px"
+    >
+      <v-btn
+        elevation="2"
+        x-large
+        @click="testGrips"
+        >Test</v-btn>
+    </v-row>
       </v-list>
-        </v-navigation-drawer>
+</v-navigation-drawer>
 </template>
 <script>
     import ROSLIB from 'roslib';
@@ -55,23 +86,21 @@
                     {name:'grip3',id:'2'}
 
                 ],
-                namesOfGrips:[],
-                selectedGrip: null,
+                namesOfGrips:['grip1','grip2','grip3'],
+                selectedGrip:'grip1',
                 ros: new ROSLIB.Ros(),
-                controllers: [
-                    { title: 'Go Home Position',icon: 'mdi-view-dashboard',function:''},
-                    {title: 'Test Movements',icon: 'mdi-help-box'}
-                ]
             }
         },
         mounted() {
             this.getConnection();
             this.getGrips();
         },
+        computed: {
+        },
         methods: {
             getConnection(){
                 this.ros = new ROSLIB.Ros();
-                this.ros.connect('ws://localhost:9090')
+                this.ros.connect('ws://192.168.1.19:9090')
             },
             getGrips(){
                 var getGripsClient = new ROSLIB.Service({
@@ -84,24 +113,74 @@
                     returnList: true
                 })
                 var stringListOfGrips = ""
-                getGripsClient.callService(request, function(result){
+                var gripnames = []
+                
+                getGripsClient.callService(request, result=>{
                     console.log(result.output);
                     stringListOfGrips = result.output
-                    //console.log(typeof stringListOfGrips)
+                    stringListOfGrips = stringListOfGrips.substring(1,stringListOfGrips.length-1)
+                    var arrayOfGrips = JSON.parse("["+stringListOfGrips+"]");
+                    arrayOfGrips.forEach(element =>{
+                        gripnames.push(element.name)
+                    })
+                    this.namesOfGrips = gripnames
+                    this.listOfGrips = arrayOfGrips
                 })
-                stringListOfGrips = stringListOfGrips.substring(1,stringListOfGrips.length-1)
-                console.log(stringListOfGrips)
             },
-
             selectGrip(){
-
+              console.log(this.selectedGrip)
+              this.openGrip()
             },
             openGrip(){
+              var id = null
+              this.listOfGrips.forEach(element =>{
+                if (element.name == this.selectedGrip)
+                id = element.id
+              })
+              console.log("Selected grip id"+id)
+              var sendGripClient = new ROSLIB.Service({
+                ros: this.ros,
+                name : '/play_grip',
+                serviceType : 'nexus_driver/PlayGrip'
+              });
+              var request = new ROSLIB.ServiceRequest({
+                gripID: parseInt(id),
+                open: true
+              });
+              sendGripClient.callService(request, function(result){console.log(result.output)});
 
             },
             closeGrip(){
+              var id = null
+              this.listOfGrips.forEach(element =>{
+                if (element.name == this.selectedGrip)
+                id = element.id
+              })
+              console.log("Selected grip id"+id)
+              var sendGripClient = new ROSLIB.Service({
+                ros: this.ros,
+                name : '/play_grip',
+                serviceType : 'nexus_driver/PlayGrip'
+              });
+              var request = new ROSLIB.ServiceRequest({
+                gripID: parseInt(id),
+                open: false
+              });
+              sendGripClient.callService(request, function(result){console.log(result.output)});
 
             },
+            testGrips(){
+                console.log("this is a placeholder for a grip tester routine")
+              var testGripClient = new ROSLIB.Service({
+                ros: this.ros,
+                name: '/test_grip',
+                serviceType: 'nexus_driver/TestGrips'
+              });
+              var request = new ROSLIB.ServiceRequest({
+                runTest: true
+              });
+              testGripClient.callService(request,function(result){console.log(result.output)});
+            }
         },
         
     }
