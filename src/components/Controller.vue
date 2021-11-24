@@ -170,7 +170,6 @@
 
             },
             testGrips(){
-                console.log("this is a placeholder for a grip tester routine")
               var testGripClient = new ROSLIB.Service({
                 ros: this.ros,
                 name: '/test_grip',
